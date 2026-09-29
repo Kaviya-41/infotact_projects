@@ -1,7 +1,3 @@
-# Local workspace development junctions
-/frontend
-/backend
-
 # Dependencies and logs
 node_modules/
 *.log
