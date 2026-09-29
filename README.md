@@ -4,26 +4,33 @@ Welcome to the **Infotact Projects** multi-project repository containing full-st
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```
-├── README.md                                    # Repository root overview and project index
+/
+├── README.md
 │
-├── FleetDash/                                   # Project 1: High-Throughput Event-Driven Fleet Telemetry Platform
-│   ├── frontend/                                # React 19 + TypeScript + Vite frontend
-│   ├── backend/                                 # Node.js + Express + MongoDB + Socket.IO backend
-│   └── README.md                                # FleetDash project documentation & setup guide
+├── FleetDash/
+│   ├── frontend/
+│   ├── backend/
+│   └── README.md
 │
-└── SyncDoc/                                     # Project 2: (Upcoming)
+└── SyncDoc/
+    ├── frontend/
+    ├── backend/
+    └── README.md
 ```
 
 ---
 
-## 🚀 Projects Overview
+## Projects
 
-### [Project 1: FleetDash](./FleetDash)
+### FleetDash
 
-**FleetDash** is a high-throughput, event-driven fleet telemetry and operations monitoring platform designed for real-time tracking, live alerts, 60 FPS HTML5 Canvas geospatial visualization, and fleet health diagnostics.
+Fleet management dashboard.
+Link: `./FleetDash`
+
+High-throughput, event-driven fleet telemetry and operations monitoring platform designed for real-time tracking, live alerts, 60 FPS HTML5 Canvas geospatial visualization, and fleet health diagnostics.
 
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS v4, HTML5 Canvas 60 FPS renderer, Socket.IO client.
 - **Backend:** Node.js, Express, MongoDB (Mongoose), Socket.IO live broadcasting, JWT authentication.
@@ -31,6 +38,13 @@ Welcome to the **Infotact Projects** multi-project repository containing full-st
 
 ---
 
-### Project 2: SyncDoc
+### SyncDoc
 
-*Coming soon.*
+Document collaboration/management application.
+Link: `./SyncDoc`
+
+High-performance, real-time collaborative document management and editing platform powered by an Abstract Syntax Tree (AST) architecture, Yjs CRDTs over WebSockets, and Puppeteer HTML/PDF export pipeline.
+
+- **Frontend:** React 19, Vite, Yjs real-time client, block-based modular editor, workspace dashboard.
+- **Backend:** Node.js, Express, TypeScript, WebSocket server, Puppeteer PDF compiler, MongoDB (Mongoose).
+- **Documentation:** Complete setup guides, architectural overview, and API specifications are in the [SyncDoc README](./SyncDoc/README.md).

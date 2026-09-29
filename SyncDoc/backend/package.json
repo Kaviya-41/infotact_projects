@@ -1,0 +1,57 @@
+{
+  "name": "syncdoc-backend",
+  "version": "1.0.0",
+  "description": "SyncDoc: Collaborative Document Engine - Backend API",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:w2d5 && npm run test:w2d6 && npm run test:w2d7",
+    "test:w2d1": "tsx src/test-week2-day1.ts",
+    "test:w2d2": "tsx src/test-week2-day2.ts",
+    "test:w2d3": "tsx src/test-week2-day3.ts",
+    "test:w2d4": "tsx src/test-week2-day4.ts",
+    "test:w2d5": "tsx src/test-week2-day5.ts",
+    "test:w2d6": "tsx src/test-week2-day6.ts",
+    "test:w2d7": "tsx src/test-week2-day7.ts",
+    "test:export": "tsx src/test-export-html.ts",
+    "test:export:complete": "tsx src/test-export-complete.ts",
+    "test:export:pdf": "tsx src/test-export-pdf.ts",
+    "test:export:api": "tsx src/test-export-api.ts",
+    "test:export:pipeline": "tsx src/test-export-pipeline.ts",
+    "test:export:robustness": "tsx src/test-export-robustness.ts",
+    "test:security": "tsx src/test-security.ts",
+    "test:realtime": "tsx src/test-realtime.ts"
+  },
+  "keywords": [
+    "syncdoc",
+    "collaborative",
+    "document",
+    "ast",
+    "backend"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "mongoose": "^9.9.3",
+    "puppeteer": "^25.10.0",
+    "ws": "^8.21.3",
+    "yjs": "^13.6.32"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.2.0",
+    "@types/ws": "^8.18.1",
+    "mongodb-memory-server": "^11.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}
