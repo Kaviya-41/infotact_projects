@@ -16,6 +16,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import * as Y from 'yjs';
 import { SyncDocProvider } from '../realtime/yjsProvider.js';
 import { generateBlockId } from '../utils/astAdapter.js';
+import { getDocument } from '../api/documentApi.js';
 
 /**
  * Convert a Y.Map block to a plain JS object.
@@ -93,7 +94,30 @@ export function useYjsDocument(documentId) {
   const [canRedo, setCanRedo] = useState(false);
 
   useEffect(() => {
-    if (!documentId) return;
+    // Immediately clear stale blocks from previous document!
+    setBlocks([]);
+    setSynced(false);
+    setCanUndo(false);
+    setCanRedo(false);
+
+    if (!documentId) {
+      setConnectionStatus('disconnected');
+      return;
+    }
+
+    setConnectionStatus('connecting');
+
+    // Immediately load document AST from REST API to display without delay
+    let isCancelled = false;
+    getDocument(documentId)
+      .then((doc) => {
+        if (!isCancelled && doc?.blocks) {
+          setBlocks(doc.blocks);
+        }
+      })
+      .catch((err) => {
+        console.warn('Initial doc fetch fallback:', err);
+      });
 
     // Create provider
     const provider = new SyncDocProvider(documentId);
@@ -118,7 +142,8 @@ export function useYjsDocument(documentId) {
 
     // Observe blocks changes (deep)
     const observer = () => {
-      setBlocks(readBlocks(yDoc));
+      const currentBlocks = readBlocks(yDoc);
+      setBlocks(currentBlocks);
       updateUndoState();
     };
 
@@ -131,12 +156,14 @@ export function useYjsDocument(documentId) {
 
     provider.onSync(() => {
       setSynced(true);
-      // Read initial state after sync
-      setBlocks(readBlocks(yDoc));
+      // Read authoritative state after sync
+      const syncedBlocks = readBlocks(yDoc);
+      setBlocks(syncedBlocks);
       updateUndoState();
     });
 
     return () => {
+      isCancelled = true;
       yBlocks.unobserveDeep(observer);
       undoManager.destroy();
       undoManagerRef.current = null;
@@ -145,6 +172,7 @@ export function useYjsDocument(documentId) {
       setSynced(false);
       setCanUndo(false);
       setCanRedo(false);
+      setBlocks([]);
     };
   }, [documentId]);
 
@@ -155,6 +183,20 @@ export function useYjsDocument(documentId) {
    * For list: updateBlock(blockId, { items: ['a', 'b'], ordered: true })
    */
   const updateBlock = useCallback((blockId, dataUpdate) => {
+    // Optimistically update React blocks state immediately so typing is 100% instant and never drops keys
+    setBlocks((prevBlocks) =>
+      prevBlocks.map((b) => {
+        if (b.id !== blockId) return b;
+        return {
+          ...b,
+          data: {
+            ...b.data,
+            ...dataUpdate,
+          },
+        };
+      })
+    );
+
     const provider = providerRef.current;
     if (!provider) return;
 
@@ -163,8 +205,8 @@ export function useYjsDocument(documentId) {
       const yBlock = yBlocks.get(i);
       if (yBlock instanceof Y.Map && yBlock.get('id') === blockId) {
         const yData = yBlock.get('data');
-        if (yData instanceof Y.Map) {
-          provider.yDoc.transact(() => {
+        provider.yDoc.transact(() => {
+          if (yData instanceof Y.Map) {
             for (const [key, value] of Object.entries(dataUpdate)) {
               if (key === 'items' && Array.isArray(value)) {
                 // Replace the Y.Array items
@@ -181,8 +223,22 @@ export function useYjsDocument(documentId) {
                 yData.set(key, value);
               }
             }
-          });
-        }
+          } else {
+            const currentData = (yData && typeof yData === 'object') ? yData : {};
+            const nextData = { ...currentData, ...dataUpdate };
+            const newYData = new Y.Map();
+            for (const [k, v] of Object.entries(nextData)) {
+              if (k === 'items' && Array.isArray(v)) {
+                const yItems = new Y.Array();
+                yItems.insert(0, v.map(String));
+                newYData.set('items', yItems);
+              } else {
+                newYData.set(k, v);
+              }
+            }
+            yBlock.set('data', newYData);
+          }
+        });
         break;
       }
     }
@@ -192,10 +248,6 @@ export function useYjsDocument(documentId) {
    * Add a new block at a specific index (or end if not specified).
    */
   const addBlock = useCallback((type = 'paragraph', index = -1) => {
-    const provider = providerRef.current;
-    if (!provider) return;
-
-    const yBlocks = provider.yDoc.getArray('blocks');
     const newBlock = {
       id: generateBlockId(),
       type,
@@ -206,9 +258,20 @@ export function useYjsDocument(documentId) {
           : { ordered: false, items: [''] },
     };
 
-    const yMap = plainBlockToYMap(newBlock);
-    const insertIndex = index >= 0 ? Math.min(index, yBlocks.length) : yBlocks.length;
-    yBlocks.insert(insertIndex, [yMap]);
+    setBlocks((prev) => {
+      const insertIndex = index >= 0 ? Math.min(index, prev.length) : prev.length;
+      const next = [...prev];
+      next.splice(insertIndex, 0, newBlock);
+      return next;
+    });
+
+    const provider = providerRef.current;
+    if (provider) {
+      const yBlocks = provider.yDoc.getArray('blocks');
+      const yMap = plainBlockToYMap(newBlock);
+      const insertIndex = index >= 0 ? Math.min(index, yBlocks.length) : yBlocks.length;
+      yBlocks.insert(insertIndex, [yMap]);
+    }
     return newBlock.id;
   }, []);
 
@@ -216,6 +279,8 @@ export function useYjsDocument(documentId) {
    * Delete a block by ID.
    */
   const deleteBlock = useCallback((blockId) => {
+    setBlocks((prev) => prev.filter((b) => b.id !== blockId));
+
     const provider = providerRef.current;
     if (!provider) return;
 

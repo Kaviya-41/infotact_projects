@@ -44,6 +44,11 @@ function getDefaultBlocks(): AstBlock[] {
   return [
     {
       id: generateId(),
+      type: "heading",
+      data: { text: "" },
+    },
+    {
+      id: generateId(),
       type: "paragraph",
       data: { text: "" },
     },

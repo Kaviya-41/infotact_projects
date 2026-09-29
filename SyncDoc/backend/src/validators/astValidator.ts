@@ -42,11 +42,6 @@ export function validateNodeData(
           path: `${pathPrefix}.data.text`,
           message: "Heading text must be a string",
         });
-      } else if (dataObj.text.trim() === "") {
-        errors.push({
-          path: `${pathPrefix}.data.text`,
-          message: "Heading text must not be empty or whitespace",
-        });
       }
       break;
     }

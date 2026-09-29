@@ -76,7 +76,11 @@ export const HeadingSchema = new Schema(
     data: {
       text: {
         type: String,
-        required: [true, "Heading block data requires text"],
+        default: "",
+        validate: {
+          validator: (val: unknown) => typeof val === "string",
+          message: "Heading block data requires text to be a string",
+        },
       },
     },
   },

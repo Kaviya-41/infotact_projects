@@ -14,6 +14,7 @@ import {
   deleteDocument,
   exportDocument,
 } from './api/documentApi.js';
+import { generateBlockId } from './utils/astAdapter.js';
 import './App.css';
 
 function App() {
@@ -183,8 +184,20 @@ function App() {
   // Handle document creation
   const handleCreateDocument = useCallback(async () => {
     try {
-      const newDoc = await createDocument('Untitled Document');
-      showToast('New document created', 'success');
+      const initialBlocks = [
+        {
+          id: generateBlockId(),
+          type: 'heading',
+          data: { text: '' },
+        },
+        {
+          id: generateBlockId(),
+          type: 'paragraph',
+          data: { text: '' },
+        },
+      ];
+      const newDoc = await createDocument('Untitled Document', initialBlocks);
+      showToast('New blank document created', 'success');
       await fetchDocList(newDoc._id);
       // Open the new document in the editor
       setSelectedDocId(newDoc._id);
