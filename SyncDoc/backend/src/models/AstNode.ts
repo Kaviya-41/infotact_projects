@@ -89,7 +89,11 @@ export const ParagraphSchema = new Schema(
     data: {
       text: {
         type: String,
-        required: [true, "Paragraph block data requires text"],
+        default: "",
+        validate: {
+          validator: (val: unknown) => typeof val === "string",
+          message: "Paragraph block data requires text to be a string",
+        },
       },
     },
   },
@@ -106,7 +110,11 @@ export const CodeSchema = new Schema(
       },
       code: {
         type: String,
-        required: [true, "Code block data requires code content"],
+        default: "",
+        validate: {
+          validator: (val: unknown) => typeof val === "string",
+          message: "Code block data requires code to be a string",
+        },
       },
     },
   },

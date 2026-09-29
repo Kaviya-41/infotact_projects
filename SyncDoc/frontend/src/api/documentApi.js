@@ -63,11 +63,24 @@ export async function getDocument(id) {
  * POST /api/documents — create a new document
  */
 export async function createDocument(title, blocks = []) {
+  let ownerId = 'frontend-user';
+  try {
+    const userStr = localStorage.getItem('syncdoc_user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user?._id || user?.id || user?.username) {
+        ownerId = String(user._id || user.id || user.username);
+      }
+    }
+  } catch {
+    // fallback to default
+  }
+
   const result = await apiFetch('/api/documents', {
     method: 'POST',
     body: JSON.stringify({
       title,
-      ownerId: 'frontend-user',
+      ownerId,
       blocks,
     }),
   });
